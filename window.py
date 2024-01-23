@@ -52,7 +52,7 @@ def main(running):
       if event.type == pygame.QUIT:
         running = False
 
-      # keydown event
+      # keydown events
       elif event.type == pygame.KEYDOWN:
         # fullscreen
         if event.key == pygame.K_F11:
@@ -71,7 +71,7 @@ def main(running):
           if game.inMainMenu and mainMenu.activeOptionIndex == len(mainMenu.options) - 1:
             running = False
 
-      # setting min width & height
+      # resize event
       elif event.type == pygame.VIDEORESIZE:
         windowWidth = min(MAIN_MONITOR.width, max(MIN_WINDOW_WIDTH, event.w))
         windowHeight = min(MAIN_MONITOR.height, max(MIN_WINDOW_HEIGHT, event.h))
