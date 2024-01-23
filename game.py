@@ -2,13 +2,9 @@
 from window import *
 import functions
 
-# game states
-inMainMenu = True
-inPauseMenu = False
-
 # Menu
 class Menu:
-  def __init__(self, menuOptions):
+  def __init__(self, menuOptions, active):
     self.options = menuOptions
 
   fontSize = int(screen.get_width() * 0.08)
@@ -30,11 +26,9 @@ class Menu:
     text = self.font.render(text, True, color)
     text_rect = text.get_rect(center = (int(screen.get_width() / 2), int(screen.get_height() / 2 + (self.fontSize + self.margin) * index)))
     screen.blit(text, text_rect)
-    
 
   def display(self):
     screen.fill('black')
     self.displayLogo()
     for i in range(len(self.options)):
       self.displayText(self.options[i], i)
-
