@@ -20,7 +20,7 @@ def main(running):
 
   # initialize window 
   pygame.init()
-  screen = pygame.display.set_mode((jsonConfigData["resolutionOptions"]["active"][0], jsonConfigData["resolutionOptions"]["active"][1]), DISPLAY_MODE_NUMBERS[jsonConfigData['displayMode']['active']])
+  screen = pygame.display.set_mode((jsonConfigData["resolution"]["active"][0], jsonConfigData["resolution"]["active"][1]), DISPLAY_MODE_NUMBERS[jsonConfigData['displayMode']['active']])
 
   # setting tickrate
   clock = pygame.time.Clock()
@@ -35,7 +35,7 @@ def main(running):
   import game
   # CREATE MENU'S OBJECTS
   mainMenu = game.Menu(MAIN_MENU_OPTIONS, inMainMenu)
-  optionsMenu = game.Menu(OPTIONS_MENU_OPTIONS, inOptionsMenu)
+  optionsMenu = game.Menu(OPTIONS_MENU_OPTIONS, inOptionsMenu, int(screen.get_width() * 0.04))
 
   # starting game
   while running:
@@ -64,6 +64,18 @@ def main(running):
             mainMenu.activeOptionIndex = 0 if mainMenu.activeOptionIndex + 1 == len(mainMenu.options) else mainMenu.activeOptionIndex + 1
           elif inOptionsMenu:
             optionsMenu.activeOptionIndex = 0 if optionsMenu.activeOptionIndex + 1 == len(optionsMenu.options) else optionsMenu.activeOptionIndex + 1
+        # key right or d clicked
+        elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+          if inOptionsMenu and len(optionsMenu.propertiesOfOption[optionsMenu.options[optionsMenu.activeOptionIndex]]):
+            optionsMenu.changeOptionToNext(optionsMenu.options[optionsMenu.activeOptionIndex])
+            screen = pygame.display.set_mode((jsonConfigData["resolution"]["active"][0], jsonConfigData["resolution"]["active"][1]), DISPLAY_MODE_NUMBERS[jsonConfigData['displayMode']['active']])
+            pygame.display.update()
+        # key left or a clicked
+        elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
+          if inOptionsMenu and len(optionsMenu.propertiesOfOption[optionsMenu.options[optionsMenu.activeOptionIndex]]):
+            optionsMenu.changeOptionToPrevious(optionsMenu.options[optionsMenu.activeOptionIndex])     
+            screen = pygame.display.set_mode((jsonConfigData["resolution"]["active"][0], jsonConfigData["resolution"]["active"][1]), DISPLAY_MODE_NUMBERS[jsonConfigData['displayMode']['active']])
+            pygame.display.update()
         # enter clicked
         elif event.key == pygame.K_RETURN:
           # closing game from main menu
@@ -98,3 +110,6 @@ def main(running):
     pygame.display.flip()
 
   pygame.quit()
+  
+  with open(functions.getsCorrectPath('data\\config.json'), 'w') as file:
+    file.write(json.dumps(jsonConfigData))
