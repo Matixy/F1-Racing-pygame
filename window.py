@@ -1,39 +1,26 @@
 # IMPORTS
-# pygame
 from mimetypes import init
 from posixpath import dirname
 from turtle import width
 import pygame
-# functions
 import functions
+from constants import *
 
 # ALL WINDOW SETUP
-# monitor setup
-MAIN_MONITOR = functions.getPrimaryMonitor()
-
-# config setup
-# setting title 
-TITLE = 'F1 Racing Game'
+# setting title
 pygame.display.set_caption(TITLE)
-# setting icon 
-FAVIOCON = pygame.image.load(functions.getsCorrectPath('img\\favicon.ico'))
+# setting icon
 pygame.display.set_icon(FAVIOCON)
 
 # window const
 screen = object
-MIN_WINDOW_WIDTH = 800
-MIN_WINDOW_HEIGHT = 600
-
-# Fonts
-DEAFULTFONT = functions.getsCorrectPath('font\\Formula1-Regular_web_0.ttf')
-
 
 def main(running):
   global screen
 
   # initialize window 
   pygame.init()
-  screen = pygame.display.set_mode((MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT), pygame.RESIZABLE)
+  screen = pygame.display.set_mode((jsonConfigData["resolutionOptions"]["active"][0], jsonConfigData["resolutionOptions"]["active"][1]), DISPLAY_MODE_NUMBERS[jsonConfigData['displayMode']['active']])
 
   # setting tickrate
   clock = pygame.time.Clock()
@@ -47,8 +34,8 @@ def main(running):
   # imports game file with all stuff
   import game
   # CREATE MENU'S OBJECTS
-  mainMenu = game.Menu(['Play', 'Options', 'Exit'], inMainMenu)
-  optionsMenu = game.Menu(['Resolution', 'Display Mode', 'Back'], inOptionsMenu)
+  mainMenu = game.Menu(MAIN_MENU_OPTIONS, inMainMenu)
+  optionsMenu = game.Menu(OPTIONS_MENU_OPTIONS, inOptionsMenu)
 
   # starting game
   while running:
