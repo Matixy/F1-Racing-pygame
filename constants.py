@@ -18,11 +18,11 @@ MAP = pygame.image.load(functions.getsCorrectPath('img\\map.png'))
 
 # monitor's options
 MAIN_MONITOR = functions.getPrimaryMonitor()
-MIN_WINDOW_WIDTH = 1280
-MIN_WINDOW_HEIGHT = 720
+MIN_WINDOW_WIDTH = jsonConfigData['resolution']['options'][len(jsonConfigData['resolution']['options']) - 1][0]
+MIN_WINDOW_HEIGHT = jsonConfigData['resolution']['options'][len(jsonConfigData['resolution']['options']) - 1][1]
 
 DISPLAY_MODE_NUMBERS = {
-  'Resizable': 16,
+  'Windowed': 0,
   'Fullscreen': -2147483648
 }
 

@@ -34,9 +34,9 @@ def main(running):
   # imports game file with all stuff
   import game
   # CREATE MENU'S OBJECTS
-  mainMenu = game.Menu(MAIN_MENU_OPTIONS, inMainMenu)
-  pauseMenu = game.Menu(PAUSE_MENU_OPTIONS, inPauseMenu, int(screen.get_width() * 0.04))
-  optionsMenu = game.Menu(OPTIONS_MENU_OPTIONS, inOptionsMenu, int(screen.get_width() * 0.04))
+  mainMenu = game.Menu(MAIN_MENU_OPTIONS, inMainMenu, int(MAIN_MONITOR.width * 0.04))
+  pauseMenu = game.Menu(PAUSE_MENU_OPTIONS, inPauseMenu)
+  optionsMenu = game.Menu(OPTIONS_MENU_OPTIONS, inOptionsMenu)
   previousMenu = ''
 
   # starting game
@@ -52,10 +52,9 @@ def main(running):
         # fullscreen
         if event.key == pygame.K_F11:
           if (screen.get_flags() & pygame.FULLSCREEN) == 0:
-            screen = pygame.display.set_mode((MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT), pygame.RESIZABLE)
             jsonConfigData['displayMode']['active'] = "Fullscreen"
           else:
-            jsonConfigData['displayMode']['active'] = "Resizable"
+            jsonConfigData['displayMode']['active'] = "Windowed"
           pygame.display.toggle_fullscreen()
         # key up or w clicked
         elif event.key == pygame.K_UP or event.key == pygame.K_w:
@@ -78,13 +77,19 @@ def main(running):
           if inOptionsMenu and len(optionsMenu.propertiesOfOption[optionsMenu.options[optionsMenu.activeOptionIndex]]):
             optionsMenu.changeOptionToPrevious(optionsMenu.options[optionsMenu.activeOptionIndex])     
             screen = pygame.display.set_mode((jsonConfigData["resolution"]["active"][0], jsonConfigData["resolution"]["active"][1]), DISPLAY_MODE_NUMBERS[jsonConfigData['displayMode']['active']])
+
             pygame.display.update()
+            optionsMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
+            pauseMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
         # key left or a clicked
         elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
           if inOptionsMenu and len(optionsMenu.propertiesOfOption[optionsMenu.options[optionsMenu.activeOptionIndex]]):
             optionsMenu.changeOptionToNext(optionsMenu.options[optionsMenu.activeOptionIndex])
             screen = pygame.display.set_mode((jsonConfigData["resolution"]["active"][0], jsonConfigData["resolution"]["active"][1]), DISPLAY_MODE_NUMBERS[jsonConfigData['displayMode']['active']])
+
             pygame.display.update()
+            optionsMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
+            pauseMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
         # escape clicked
         elif event.key == pygame.K_ESCAPE:
           if inGame:
@@ -137,18 +142,6 @@ def main(running):
             inPauseMenu = False
             inMainMenu = True
             pauseMenu.activeOptionIndex = 0
-
-      # resize event
-      elif event.type == pygame.VIDEORESIZE:
-        windowWidth = min(MAIN_MONITOR.width, max(MIN_WINDOW_WIDTH, event.w))
-        windowHeight = min(MAIN_MONITOR.height, max(MIN_WINDOW_HEIGHT, event.h))
-
-        # changing font size
-        optionsMenu.fontSize = int(screen.get_width() * 0.04)
-
-        if (windowWidth, windowHeight) != event.size:
-          screen = pygame.display.set_mode((windowWidth, windowHeight), pygame.RESIZABLE)
-          pygame.display.update()
         
     # fill the screen with a color to wipe away anything from last frame
     if inMainMenu:
@@ -160,7 +153,7 @@ def main(running):
     elif inGame:
       game.Grid.generateMap()
     # RENDER YOUR GAME HERE
-
+    
     pygame.display.flip()
 
   pygame.quit()
