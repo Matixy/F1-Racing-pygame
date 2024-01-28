@@ -1,1 +1,33 @@
-{"resolution": {"active": [1280, 720], "options": [[1920, 1080], [1600, 900], [1366, 768], [1280, 720]]}, "displayMode": {"active": "Resizable", "options": ["Resizable", "Fullscreen"]}}
+{
+  "resolution": {
+    "active": [
+      1366,
+      768
+    ],
+    "options": [
+      [
+        1920,
+        1080
+      ],
+      [
+        1600,
+        900
+      ],
+      [
+        1366,
+        768
+      ],
+      [
+        1280,
+        720
+      ]
+    ]
+  },
+  "displayMode": {
+    "active": "Resizable",
+    "options": [
+      "Resizable",
+      "Fullscreen"
+    ]
+  }
+}

@@ -5,6 +5,7 @@ from screeninfo import get_monitors
 import pygame
 import window
 from re import sub
+import json
 
 getsCorrectPath = lambda pathToRootDirectory: f'{os.getcwd()}\{pathToRootDirectory}'
 
@@ -19,3 +20,12 @@ def transformImage(image, scale):
 def convertToCammelCase(text):
   text = sub(r"(_|-)+", " ", text).title().replace(" ", "")
   return ''.join([text[0].lower(), text[1:]])
+
+def readConfigJson():
+  with open(getsCorrectPath('data\\config.json'), 'r') as file:
+   data = json.loads(file.read())
+  return data
+
+def saveConfigJson(data):
+  with open(getsCorrectPath('data\\config.json'), 'w') as file:
+    file.write(json.dumps(data, indent=2))

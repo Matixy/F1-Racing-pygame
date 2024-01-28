@@ -1,21 +1,22 @@
 # IMPORTS
 import pygame
 import functions
-import json
 
 # setting data from config.json
-jsonConfigData = dict()
-with open(functions.getsCorrectPath('data\\config.json'), 'r') as file:
-  jsonConfigData = json.loads(file.read())
+jsonConfigData = functions.readConfigJson()
 
+# text
 TITLE = 'F1 Racing Game'
 FAVIOCON = pygame.image.load(functions.getsCorrectPath('img\\favicon.ico'))
 DEAFULTFONT = functions.getsCorrectPath('font\\Formula1-Regular_web_0.ttf')
 
+# images
 LOGO = pygame.image.load(functions.getsCorrectPath('img\\f1_banner.png'))
 ARROW_RIGHT = pygame.image.load(functions.getsCorrectPath('img\\angle-right-solid.png'))
-ARROW_LEFT =pygame.image.load(functions.getsCorrectPath('img\\angle-left-solid.png'))
+ARROW_LEFT = pygame.image.load(functions.getsCorrectPath('img\\angle-left-solid.png'))
+MAP = pygame.image.load(functions.getsCorrectPath('img\\map.png'))
 
+# monitor's options
 MAIN_MONITOR = functions.getPrimaryMonitor()
 MIN_WINDOW_WIDTH = 1280
 MIN_WINDOW_HEIGHT = 720
@@ -25,10 +26,17 @@ DISPLAY_MODE_NUMBERS = {
   'Fullscreen': -2147483648
 }
 
+# menu's options
 MAIN_MENU_OPTIONS = {
   "Play": [],
   "Options": [],
   "Exit": [] 
+}
+
+PAUSE_MENU_OPTIONS = {
+  "Resume": [],
+  "Options": [],
+  "Save & exit to main menu": [] 
 }
 
 OPTIONS_MENU_OPTIONS = {

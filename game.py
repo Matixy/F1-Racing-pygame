@@ -23,12 +23,15 @@ class Menu:
   def displayLogo(self):
     transformedLogo = functions.transformImage(LOGO, 0.5)
     screen.blit(transformedLogo, (int(screen.get_width() / 2 - transformedLogo.get_width() / 2), int(screen.get_height() / 2 - self.fontSize - transformedLogo.get_height())))
+    
 
   def displayText(self, textContent, index):
+    # display text
     color = self.hoverColor if index == self.activeOptionIndex else self.defaultColor
     text = self.font.render(textContent, True, color)
     text_rect = text.get_rect(center = (int(screen.get_width() / 2), int(screen.get_height() / 2 + (self.fontSize + self.margin) * index)))
     
+    # display options if text is in option menu
     if len(self.propertiesOfOption[textContent]) > 0:
       optionTextContent = str(jsonConfigData[functions.convertToCammelCase(textContent)]['active'][0]) + 'x ' + str(jsonConfigData[functions.convertToCammelCase(textContent)]['active'][1]) if textContent == 'Resolution' else jsonConfigData[functions.convertToCammelCase(textContent)]['active']
       
@@ -63,3 +66,8 @@ class Menu:
     self.displayLogo()
     for i in range(len(self.options)):
       self.displayText(self.options[i], i)
+
+class Grid:
+  def generateMap():
+    transformedMap = functions.transformImage(MAP, 1)
+    screen.blit(transformedMap, (0,0))
