@@ -81,45 +81,55 @@ class Grid:
 class Car:
   def __init__(self):
     self.carImg = functions.transformImage(CAR, CAR_SCALE)
-    self.carFront = self.carImg.get_rect().bottomleft
-    self.carBack = self.carImg.get_rect().topleft
     self.movingFoward = False
     self.movingRight = False
     self.movingBackward = False
     self.movingLeft = False
     self.angle = 0
-    self.position = [0,0]
+    self.speed = 0
+    self.acceleration = CAR_ACCELERATION
+    self.position = [100,100]
 
-  def moveForward(self):
-    self.position = [self.position[0] + CAR_SPEED, self.position[1] + CAR_SPEED]
+  def move(self):
+    radians = math.radians(self.angle)
+    speedX = math.sin(radians) * self.speed
+    speedY = math.cos(radians) * self.speed
 
-  def moveRight(self):
-    self.rotateCar('right')
-
-  def moveBackward(self):
-    self.position = [self.position[0] - CAR_SPEED, self.position[1] - CAR_SPEED]
-
-  def moveLeft(self):
-    self.rotateCar('left')
+    self.position[0] += speedX
+    self.position[1] += speedY
 
   def rotateCar(self, option):
     if option == 'left':
-      self.angle += 3
-    else:
-      self.angle -= 3
+      self.angle += CAR_ROTATE_SPEED
+    elif option == 'right':
+      self.angle -= CAR_ROTATE_SPEED
 
-    rotatedImage = functions.roatateImage(CAR, self.angle)
-    rotatedImage = functions.transformImage(rotatedImage, CAR_SCALE)
-    newRect = rotatedImage.get_rect(center = self.carImg.get_rect(topleft = self.position).center)
+    if self.angle > 360:
+      self.angle -= 360
+    elif self.angle < 0:
+      self.angle = 360 + self.angle
 
-    self.carImg = rotatedImage
-    self.position = newRect.topleft
+  def reduceSpeed(self):
+    self.speed = max(self.speed - self.acceleration / 1.2 , min(self.speed + self.acceleration / 1.2 ,0))
 
   def moveCar(self):
-    if self.movingFoward: self.moveForward()
-    if self.movingRight: self.moveRight()
-    if self.movingBackward: self.moveBackward()
-    if self.movingLeft: self.moveLeft()
+    if self.movingFoward and self.speed < CAR_MAX_SPEED:
+      self.speed += self.acceleration
+    elif self.movingBackward and self.speed > CAR_MAX_SPEED * -1:
+      self.speed -= self.acceleration
+    else:
+      self.reduceSpeed()
+
+    self.move()
+
+    if self.movingLeft: self.rotateCar('left')
+    if self.movingRight: self.rotateCar('right')
+
+  def blitCarCenter(self):
+    rotated_image = pygame.transform.rotate(self.carImg, self.angle)
+    new_rect = rotated_image.get_rect(
+        center=self.carImg.get_rect(topleft=self.position).center)
+    screen.blit(rotated_image, new_rect.topleft)
 
   def displayCar(self):
-    screen.blit(self.carImg, self.position)
+    self.blitCarCenter()

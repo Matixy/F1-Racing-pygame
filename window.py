@@ -38,7 +38,7 @@ def main(running):
   pauseMenu = game.Menu(PAUSE_MENU_OPTIONS, inPauseMenu)
   optionsMenu = game.Menu(OPTIONS_MENU_OPTIONS, inOptionsMenu)
   previousMenu = ''
-
+  
   # create user's car
   userCar = game.Car()
 
@@ -152,6 +152,7 @@ def main(running):
           elif inPauseMenu and pauseMenu.activeOptionIndex == len(pauseMenu.options) - 1:
             inPauseMenu = False
             inMainMenu = True
+            previousMenu = 'pause'
             pauseMenu.activeOptionIndex = 0
       
       # key up events
@@ -175,6 +176,8 @@ def main(running):
         
     # fill the screen with a color to wipe away anything from last frame
     if inMainMenu:
+      if previousMenu == 'pause':
+        userCar = game.Car()
       mainMenu.display()
     elif inOptionsMenu:
       optionsMenu.display()
@@ -182,8 +185,8 @@ def main(running):
       pauseMenu.display()
     elif inGame:
       game.Grid.generateMap()
-      userCar.moveCar()
       userCar.displayCar()
+      userCar.moveCar()
     # RENDER YOUR GAME HERE
     
     pygame.display.flip()
