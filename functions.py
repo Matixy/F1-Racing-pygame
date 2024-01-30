@@ -17,6 +17,9 @@ def getPrimaryMonitor():
 def transformImage(image, scale):
   return pygame.transform.scale(image, (window.screen.get_width() * scale, window.screen.get_width() * scale / image.get_width() * image.get_height()))
 
+def roatateImage(image, angle):
+  return pygame.transform.rotate(image, angle)
+
 def convertToCammelCase(text):
   text = sub(r"(_|-)+", " ", text).title().replace(" ", "")
   return ''.join([text[0].lower(), text[1:]])

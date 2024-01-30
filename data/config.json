@@ -1,8 +1,8 @@
 {
   "resolution": {
     "active": [
-      1280,
-      720
+      1366,
+      768
     ],
     "options": [
       [
@@ -24,7 +24,7 @@
     ]
   },
   "displayMode": {
-    "active": "Windowed",
+    "active": "Fullscreen",
     "options": [
       "Windowed",
       "Fullscreen"

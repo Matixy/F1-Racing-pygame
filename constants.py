@@ -15,6 +15,7 @@ LOGO = pygame.image.load(functions.getsCorrectPath('img\\f1_banner.png'))
 ARROW_RIGHT = pygame.image.load(functions.getsCorrectPath('img\\angle-right-solid.png'))
 ARROW_LEFT = pygame.image.load(functions.getsCorrectPath('img\\angle-left-solid.png'))
 MAP = pygame.image.load(functions.getsCorrectPath('img\\map.png'))
+CAR = pygame.image.load(functions.getsCorrectPath('img\\car.png'))
 
 # monitor's options
 MAIN_MONITOR = functions.getPrimaryMonitor()
@@ -44,3 +45,8 @@ OPTIONS_MENU_OPTIONS = {
   "Display Mode": jsonConfigData['displayMode']['options'],
   "Back": [] 
 }
+
+# car's settings
+CAR_SCALE = 0.03
+CAR_SPEED = 1
+CAR_ROTATE_SPEED = 3

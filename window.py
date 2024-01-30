@@ -39,17 +39,20 @@ def main(running):
   optionsMenu = game.Menu(OPTIONS_MENU_OPTIONS, inOptionsMenu)
   previousMenu = ''
 
+  # create user's car
+  userCar = game.Car()
+
   # starting game
   while running:
     # events control
     for event in pygame.event.get():
-      # closing
+      # quit event - closing
       if event.type == pygame.QUIT:
         running = False
 
       # keydown events
       elif event.type == pygame.KEYDOWN:
-        # fullscreen
+        # f11 clicked- fullscreen
         if event.key == pygame.K_F11:
           if (screen.get_flags() & pygame.FULLSCREEN) == 0:
             jsonConfigData['displayMode']['active'] = "Fullscreen"
@@ -64,6 +67,8 @@ def main(running):
             optionsMenu.activeOptionIndex = len(optionsMenu.options) - 1 if optionsMenu.activeOptionIndex == 0 else optionsMenu.activeOptionIndex - 1
           elif inPauseMenu:
             pauseMenu.activeOptionIndex = len(pauseMenu.options) - 1 if pauseMenu.activeOptionIndex == 0 else pauseMenu.activeOptionIndex - 1
+          elif inGame:
+            userCar.movingFoward = True
         # key down or s clicked
         elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
           if inMainMenu:
@@ -72,6 +77,8 @@ def main(running):
             optionsMenu.activeOptionIndex = 0 if optionsMenu.activeOptionIndex + 1 == len(optionsMenu.options) else optionsMenu.activeOptionIndex + 1
           elif inPauseMenu:
             pauseMenu.activeOptionIndex = 0 if pauseMenu.activeOptionIndex + 1 == len(pauseMenu.options) else pauseMenu.activeOptionIndex + 1
+          elif inGame:
+            userCar.movingBackward = True
         # key right or d clicked
         elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
           if inOptionsMenu and len(optionsMenu.propertiesOfOption[optionsMenu.options[optionsMenu.activeOptionIndex]]):
@@ -81,6 +88,8 @@ def main(running):
             pygame.display.update()
             optionsMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
             pauseMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
+          elif inGame:
+            userCar.movingRight = True
         # key left or a clicked
         elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
           if inOptionsMenu and len(optionsMenu.propertiesOfOption[optionsMenu.options[optionsMenu.activeOptionIndex]]):
@@ -90,6 +99,8 @@ def main(running):
             pygame.display.update()
             optionsMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
             pauseMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
+          elif inGame:
+            userCar.movingLeft = True
         # escape clicked
         elif event.key == pygame.K_ESCAPE:
           if inGame:
@@ -142,6 +153,25 @@ def main(running):
             inPauseMenu = False
             inMainMenu = True
             pauseMenu.activeOptionIndex = 0
+      
+      # key up events
+      elif event.type == pygame.KEYUP:
+        # key up or w clicked
+        if event.key == pygame.K_UP or event.key == pygame.K_w:
+          if inGame:
+            userCar.movingFoward = False
+        # key down or s clicked
+        elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+          if inGame:
+            userCar.movingBackward = False
+        # key left or a clicked
+        if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+          if inGame:
+            userCar.movingLeft = False
+        # key right or d clicked
+        elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+          if inGame:
+            userCar.movingRight = False
         
     # fill the screen with a color to wipe away anything from last frame
     if inMainMenu:
@@ -152,6 +182,8 @@ def main(running):
       pauseMenu.display()
     elif inGame:
       game.Grid.generateMap()
+      userCar.moveCar()
+      userCar.displayCar()
     # RENDER YOUR GAME HERE
     
     pygame.display.flip()

@@ -1,4 +1,6 @@
 # IMPORTS
+import math
+from turtle import position
 from window import *
 import functions
 from constants import *
@@ -75,3 +77,49 @@ class Grid:
   def generateMap():
     transformedMap = functions.transformImage(MAP, 1)
     screen.blit(transformedMap, (0,0))
+
+class Car:
+  def __init__(self):
+    self.carImg = functions.transformImage(CAR, CAR_SCALE)
+    self.carFront = self.carImg.get_rect().bottomleft
+    self.carBack = self.carImg.get_rect().topleft
+    self.movingFoward = False
+    self.movingRight = False
+    self.movingBackward = False
+    self.movingLeft = False
+    self.angle = 0
+    self.position = [0,0]
+
+  def moveForward(self):
+    self.position = [self.position[0] + CAR_SPEED, self.position[1] + CAR_SPEED]
+
+  def moveRight(self):
+    self.rotateCar('right')
+
+  def moveBackward(self):
+    self.position = [self.position[0] - CAR_SPEED, self.position[1] - CAR_SPEED]
+
+  def moveLeft(self):
+    self.rotateCar('left')
+
+  def rotateCar(self, option):
+    if option == 'left':
+      self.angle += 3
+    else:
+      self.angle -= 3
+
+    rotatedImage = functions.roatateImage(CAR, self.angle)
+    rotatedImage = functions.transformImage(rotatedImage, CAR_SCALE)
+    newRect = rotatedImage.get_rect(center = self.carImg.get_rect(topleft = self.position).center)
+
+    self.carImg = rotatedImage
+    self.position = newRect.topleft
+
+  def moveCar(self):
+    if self.movingFoward: self.moveForward()
+    if self.movingRight: self.moveRight()
+    if self.movingBackward: self.moveBackward()
+    if self.movingLeft: self.moveLeft()
+
+  def displayCar(self):
+    screen.blit(self.carImg, self.position)
