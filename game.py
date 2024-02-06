@@ -13,8 +13,8 @@ class Stats:
   def __init__(self, fontSize = int(screen.get_width() * 0.01)):
     self.times = {
       "Best Lap Time": jsonScoreData['bestLapTime'],
-      "Current Lap": 0,
-      "Best Lap on Current Session": 0
+      "Current Lap": 0.00,
+      "Best Lap on Current Session": 0.00
     }
     self.fontSize = fontSize
     self.margin = 10
@@ -42,11 +42,15 @@ class Stats:
       self.times["Best Lap on Current Session"] = self.times["Current Lap"]
     if self.times["Best Lap on Current Session"] <= self.times["Best Lap Time"] or self.times["Best Lap Time"] == 0:
       self.times["Best Lap Time"] = self.times["Best Lap on Current Session"]
+      jsonScoreData['bestLapTime'] = self.times["Best Lap on Current Session"]
   
   def display(self):
     for timeParameter in self.times:
       index = list(self.times).index(timeParameter)
-      text = self.font.render(f'{timeParameter}: {self.times[timeParameter]}', True, self.color)
+      textContent = str(self.times[timeParameter]).replace('.',':')
+      if textContent[1] == ':': textContent = '0' + textContent
+      if textContent[-2] == ':': textContent += '0'
+      text = self.font.render(f'{timeParameter}: {textContent}', True, self.color)
       text_rect = text.get_rect(topleft = (int(self.margin), int(index * (self.fontSize + self.margin) + self.margin)))
       screen.blit(text, text_rect) 
 

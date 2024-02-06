@@ -90,6 +90,7 @@ def main(running):
           elif inPauseMenu:
             pauseMenu.activeOptionIndex = 0 if pauseMenu.activeOptionIndex + 1 == len(pauseMenu.options) else pauseMenu.activeOptionIndex + 1
           elif inGame:
+            if stats.startLapTimestamp == None: stats.startCountLapTime()
             userCar.movingBackward = True
         # key right or d clicked
         elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
@@ -208,7 +209,7 @@ def main(running):
       optionsMenu.display()
     elif inPauseMenu:
       pauseMenu.display()
-      stats.freezeTime()
+      if stats.startLapTimestamp != None: stats.freezeTime()
     elif inGame:
       grid.generateMap()
 
@@ -242,4 +243,4 @@ def main(running):
   pygame.quit()
   
   functions.saveJson(jsonConfigData, functions.getsCorrectPath('data\\config.json'))
-  functions.saveJson(stats.times['Best Lap Time'], functions.getsCorrectPath('data\\scores.json'))
+  functions.saveJson({"bestLapTime":stats.times['Best Lap Time']}, functions.getsCorrectPath('data\\scores.json'))
