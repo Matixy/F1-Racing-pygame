@@ -5,6 +5,7 @@ from turtle import width
 import pygame
 import functions
 from constants import *
+import math
 
 # ALL WINDOW SETUP
 # setting title
@@ -41,6 +42,10 @@ def main(running):
   
   # create user's car
   userCar = game.Car()
+  # generate grid
+  grid = game.Grid()
+  finishColisionPos = None
+  finishPrevColisionPos = None
 
   # starting game
   while running:
@@ -59,6 +64,7 @@ def main(running):
           else:
             jsonConfigData['displayMode']['active'] = "Windowed"
           pygame.display.toggle_fullscreen()
+          
         # key up or w clicked
         elif event.key == pygame.K_UP or event.key == pygame.K_w:
           if inMainMenu:
@@ -82,23 +88,36 @@ def main(running):
         # key right or d clicked
         elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
           if inOptionsMenu and len(optionsMenu.propertiesOfOption[optionsMenu.options[optionsMenu.activeOptionIndex]]):
+            prevScreenSize = screen.get_size()
             optionsMenu.changeOptionToPrevious(optionsMenu.options[optionsMenu.activeOptionIndex])     
             screen = pygame.display.set_mode((jsonConfigData["resolution"]["active"][0], jsonConfigData["resolution"]["active"][1]), DISPLAY_MODE_NUMBERS[jsonConfigData['displayMode']['active']])
 
-            pygame.display.update()
+            # update game params
+            grid.updateMap()
+            userCar.updateParameters(prevScreenSize)  
             optionsMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
             pauseMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
+
+            pygame.display.update()
           elif inGame:
             userCar.movingRight = True
         # key left or a clicked
         elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
           if inOptionsMenu and len(optionsMenu.propertiesOfOption[optionsMenu.options[optionsMenu.activeOptionIndex]]):
+            # SET SETTINGS
+            prevScreenSize = screen.get_size()
             optionsMenu.changeOptionToNext(optionsMenu.options[optionsMenu.activeOptionIndex])
             screen = pygame.display.set_mode((jsonConfigData["resolution"]["active"][0], jsonConfigData["resolution"]["active"][1]), DISPLAY_MODE_NUMBERS[jsonConfigData['displayMode']['active']])
 
-            pygame.display.update()
+            # update game params
+            grid.updateMap()
+            userCar.updateParameters(prevScreenSize)  
+
+            # UPDATE MARGIN'S
             optionsMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
             pauseMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
+
+            pygame.display.update()
           elif inGame:
             userCar.movingLeft = True
         # escape clicked
@@ -174,7 +193,7 @@ def main(running):
           if inGame:
             userCar.movingRight = False
         
-    # fill the screen with a color to wipe away anything from last frame
+
     if inMainMenu:
       if previousMenu == 'pause':
         userCar = game.Car()
@@ -184,9 +203,26 @@ def main(running):
     elif inPauseMenu:
       pauseMenu.display()
     elif inGame:
-      game.Grid.generateMap()
+      grid.generateMap()
       userCar.displayCar()
       userCar.moveCar()
+
+      if userCar.colide(grid.borderMask):
+        userCar.bounce()
+        
+      # prevent wrong way driving
+      finishColisionPos = userCar.colide(grid.finishLineMask, *grid.finishLinePosition)
+      if finishColisionPos and finishPrevColisionPos:
+        if finishPrevColisionPos[1] != finishColisionPos[1]:
+          if finishPrevColisionPos[1] > finishColisionPos[1]:
+            userCar.wrongDirection = True
+          elif finishPrevColisionPos[1] < finishColisionPos[1] and finishColisionPos[1] == 1 and userCar.wrongDirection == True:
+            userCar.wrongDirection = False
+          elif finishPrevColisionPos[1] < finishColisionPos[1] and finishColisionPos[1] == 1 and userCar.wrongDirection == False:
+            print('finish')
+      finishPrevColisionPos = finishColisionPos
+
+        
     # RENDER YOUR GAME HERE
     
     pygame.display.flip()

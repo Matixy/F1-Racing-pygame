@@ -15,6 +15,8 @@ LOGO = pygame.image.load(functions.getsCorrectPath('img\\f1_banner.png'))
 ARROW_RIGHT = pygame.image.load(functions.getsCorrectPath('img\\angle-right-solid.png'))
 ARROW_LEFT = pygame.image.load(functions.getsCorrectPath('img\\angle-left-solid.png'))
 MAP = pygame.image.load(functions.getsCorrectPath('img\\map.png'))
+MAP_BORDER = pygame.image.load(functions.getsCorrectPath('img\\map-border.png'))
+FINISH_LINE = pygame.image.load(functions.getsCorrectPath('img\\finish_line.png'))
 CAR = pygame.image.load(functions.getsCorrectPath('img\\car.png'))
 
 # monitor's options
@@ -46,8 +48,11 @@ OPTIONS_MENU_OPTIONS = {
   "Back": [] 
 }
 
+# Finish line settings
+FINISH_LINE_SCALE = 0.1
+
 # car's settings
 CAR_SCALE = 0.04
-CAR_ROTATE_SPEED = 1
-CAR_MAX_SPEED = 1.2
-CAR_ACCELERATION = 0.01
+CAR_ROTATE_SPEED_RATIO = 0.0005
+# CAR_MAX_SPEED_RATIO = 1 * 
+# CAR_ACCELERATION = 0.01

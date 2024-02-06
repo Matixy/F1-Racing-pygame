@@ -5,6 +5,14 @@ from window import *
 import functions
 from constants import *
 
+curentRaceData = {
+  "Best Time": "00:00",
+  "Best All Time": "00:00",
+  "Lap time": "00:00"
+}
+
+prevScreenSize = []
+
 # Menu
 class Menu:
   def __init__(self, menuOptions, active, fontSize = int(screen.get_width() * 0.03)):
@@ -22,9 +30,6 @@ class Menu:
   def updateFontAndMargin(self, fontSize):
     self.fontSize = fontSize
     self.margin = 21.6
-
-  def displayOptionsToText(self, optionName):
-    print(functions.convertToCammelCase(optionName))
 
   def displayLogo(self):
     transformedLogo = functions.transformImage(LOGO, 0.5)
@@ -59,12 +64,12 @@ class Menu:
   
   def changeOptionToNext(self, option):
     cammelTextOption = functions.convertToCammelCase(option)
-    
+
     jsonConfigData[cammelTextOption]['active'] = self.propertiesOfOption[option][0] if self.propertiesOfOption[option].index(jsonConfigData[cammelTextOption]['active']) == len(self.propertiesOfOption[option]) - 1 else self.propertiesOfOption[option][self.propertiesOfOption[option].index(jsonConfigData[cammelTextOption]['active']) + 1]
     
   def changeOptionToPrevious(self, option):
     cammelTextOption = functions.convertToCammelCase(option)
-    
+
     jsonConfigData[cammelTextOption]['active'] = self.propertiesOfOption[option][len(self.propertiesOfOption[option]) - 1] if self.propertiesOfOption[option].index(jsonConfigData[cammelTextOption]['active']) == 0 else self.propertiesOfOption[option][self.propertiesOfOption[option].index(jsonConfigData[cammelTextOption]['active']) - 1]
 
   def display(self):
@@ -74,9 +79,25 @@ class Menu:
       self.displayText(self.options[i], i)
 
 class Grid:
-  def generateMap():
-    transformedMap = functions.transformImage(MAP, 1)
-    screen.blit(transformedMap, (0,0))
+  def __init__(self):
+    self.transformedMap = functions.transformImage(MAP, 1)
+    self.borderMap = functions.transformImage(MAP_BORDER, 1)
+    self.borderMask = pygame.mask.from_surface(self.borderMap)
+    self.finishLine = functions.transformImage(FINISH_LINE, FINISH_LINE_SCALE)
+    self.finishLinePosition = (int(screen.get_width() / 1.21), int(screen.get_height()/ 1.86))
+    self.finishLineMask = pygame.mask.from_surface(self.finishLine)
+
+  def updateMap(self):
+    self.transformedMap = functions.transformImage(MAP, 1)
+    self.borderMap = functions.transformImage(MAP_BORDER, 1)
+    self.borderMask = pygame.mask.from_surface(self.borderMap)
+    self.finishLine = functions.transformImage(FINISH_LINE, FINISH_LINE_SCALE)
+    self.finishLinePosition = (int(screen.get_width() / 1.21), int(screen.get_height()/ 1.86))
+    self.finishLineMask = pygame.mask.from_surface(self.finishLine)
+
+  def generateMap(self):
+    screen.blit(self.transformedMap, (0,0))
+    screen.blit(self.finishLine, self.finishLinePosition)
 
 class Car:
   def __init__(self):
@@ -87,8 +108,17 @@ class Car:
     self.movingLeft = False
     self.angle = 0
     self.speed = 0
-    self.acceleration = CAR_ACCELERATION
-    self.position = [100,100]
+    self.acceleration = screen.get_width() / 1280 * 0.01
+    self.maxSpeed = screen.get_width() / 1280 * 0.5
+    self.carCurrentImg = pygame.transform.rotate(self.carImg, self.angle)
+    self.wrongDirection = False
+    self.position = [screen.get_width()/2 + screen.get_width() * 0.355, screen.get_height()/2 + self.carCurrentImg.get_height()]
+
+  def updateParameters(self, prevScreenSize):
+    self.acceleration = screen.get_width() / 1280 * 0.01
+    self.maxSpeed = screen.get_width() / 1280 * 0.5
+    self.carImg = functions.transformImage(CAR, CAR_SCALE)
+    self.position = [screen.get_width() / prevScreenSize[0] * self.position[0], screen.get_height() / prevScreenSize[1] * self.position[1]]
 
   def move(self):
     radians = math.radians(self.angle)
@@ -100,9 +130,9 @@ class Car:
 
   def rotateCar(self, option):
     if option == 'left':
-      self.angle += CAR_ROTATE_SPEED
+      self.angle += CAR_ROTATE_SPEED_RATIO * screen.get_width()
     elif option == 'right':
-      self.angle -= CAR_ROTATE_SPEED
+      self.angle -= CAR_ROTATE_SPEED_RATIO * screen.get_width()
 
     if self.angle > 360:
       self.angle -= 360
@@ -113,23 +143,41 @@ class Car:
     self.speed = max(self.speed - self.acceleration / 1.2 , min(self.speed + self.acceleration / 1.2 ,0))
 
   def moveCar(self):
-    if self.movingFoward and self.speed < CAR_MAX_SPEED:
+    if self.movingFoward and self.speed < self.maxSpeed:
       self.speed += self.acceleration
-    elif self.movingBackward and self.speed > CAR_MAX_SPEED * -1:
+    elif self.movingBackward and self.speed > self.maxSpeed * -1:
       self.speed -= self.acceleration
     else:
       self.reduceSpeed()
 
-    self.move()
-
     if self.movingLeft: self.rotateCar('left')
     if self.movingRight: self.rotateCar('right')
+
+    self.move()
 
   def blitCarCenter(self):
     rotated_image = pygame.transform.rotate(self.carImg, self.angle)
     new_rect = rotated_image.get_rect(
         center=self.carImg.get_rect(topleft=self.position).center)
+    self.carCurrentImg = rotated_image
     screen.blit(rotated_image, new_rect.topleft)
+
+  def colide(self, gridMask, x = 0, y = 0):
+    carMask = pygame.mask.from_surface(self.carCurrentImg)
+    offset = (int(self.position[0] - x), int(self.position[1] - y))
+    pos = gridMask.overlap(carMask, offset)
+    return pos
+  
+  def bounce(self):
+    self.speed = -self.speed
+    if self.movingLeft: 
+      self.movingLeft = False
+      self.angle -= CAR_ROTATE_SPEED_RATIO * screen.get_width() * 3
+    elif self.movingRight: 
+      self.movingRight = False
+      self.angle += CAR_ROTATE_SPEED_RATIO * screen.get_width() * 3
+
+    self.move()
 
   def displayCar(self):
     self.blitCarCenter()
