@@ -219,8 +219,7 @@ def main(running):
       userCar.displayCar()
       userCar.moveCar()
 
-      if userCar.colide(grid.borderMask):
-        userCar.bounce()
+      if userCar.colide(grid.borderMask): userCar.bounce()
         
       # prevent wrong way driving
       finishColisionPos = userCar.colide(grid.finishLineMask, *grid.finishLinePosition)
@@ -234,9 +233,6 @@ def main(running):
             stats.updateStats()
             stats.startCountLapTime()
       finishPrevColisionPos = finishColisionPos
-
-        
-    # RENDER YOUR GAME HERE
     
     pygame.display.flip()
 
