@@ -21,11 +21,11 @@ def convertToCammelCase(text):
   text = sub(r"(_|-)+", " ", text).title().replace(" ", "")
   return ''.join([text[0].lower(), text[1:]])
 
-def readConfigJson():
-  with open(getsCorrectPath('data\\config.json'), 'r') as file:
+def readJson(path):
+  with open(path, 'r') as file:
    data = json.loads(file.read())
   return data
 
-def saveConfigJson(data):
-  with open(getsCorrectPath('data\\config.json'), 'w') as file:
+def saveJson(data, path):
+  with open(path, 'w') as file:
     file.write(json.dumps(data, indent=2))

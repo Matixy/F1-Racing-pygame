@@ -3,7 +3,8 @@ import pygame
 import functions
 
 # setting data from config.json
-jsonConfigData = functions.readConfigJson()
+jsonConfigData = functions.readJson(functions.getsCorrectPath('data\\config.json'))
+jsonScoreData = functions.readJson(functions.getsCorrectPath('data\\scores.json'))
 
 # text
 TITLE = 'F1 Racing Game'

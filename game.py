@@ -1,17 +1,54 @@
 # IMPORTS
 import math
+import time
 from turtle import position
 from window import *
 import functions
 from constants import *
 
-curentRaceData = {
-  "Best Time": "00:00",
-  "Best All Time": "00:00",
-  "Lap time": "00:00"
-}
-
 prevScreenSize = []
+
+# stats
+class Stats:
+  def __init__(self, fontSize = int(screen.get_width() * 0.01)):
+    self.times = {
+      "Best Lap Time": jsonScoreData['bestLapTime'],
+      "Current Lap": 0,
+      "Best Lap on Current Session": 0
+    }
+    self.fontSize = fontSize
+    self.margin = 10
+    self.color = 'white'
+    self.startLapTimestamp = None
+    self.freezeTimestamp = None
+    self.font = pygame.font.Font(DEAFULTFONT, fontSize)
+
+  def updateFontAndMargin(self, fontSize):
+    self.fontSize = fontSize
+    self.margin = 10
+
+  def startCountLapTime(self):
+    self.startLapTimestamp = round(time.time(), 2)
+
+  def freezeTime(self):
+    self.startLapTimestamp = round(time.time() - self.times["Current Lap"], 2)
+
+  def countLapTime(self):
+    if self.freezeTimestamp != None: self.freezeTimestamp = None
+    self.times["Current Lap"] = round(time.time() - self.startLapTimestamp , 2)
+
+  def updateStats(self):
+    if self.times["Current Lap"] <= self.times["Best Lap on Current Session"] or self.times["Best Lap on Current Session"] == 0:
+      self.times["Best Lap on Current Session"] = self.times["Current Lap"]
+    if self.times["Best Lap on Current Session"] <= self.times["Best Lap Time"] or self.times["Best Lap Time"] == 0:
+      self.times["Best Lap Time"] = self.times["Best Lap on Current Session"]
+  
+  def display(self):
+    for timeParameter in self.times:
+      index = list(self.times).index(timeParameter)
+      text = self.font.render(f'{timeParameter}: {self.times[timeParameter]}', True, self.color)
+      text_rect = text.get_rect(topleft = (int(self.margin), int(index * (self.fontSize + self.margin) + self.margin)))
+      screen.blit(text, text_rect) 
 
 # Menu
 class Menu:

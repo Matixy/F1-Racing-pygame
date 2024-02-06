@@ -1,6 +1,9 @@
 # IMPORTS
 from mimetypes import init
+from os import stat
 from posixpath import dirname
+import time
+from tkinter.messagebox import NO
 from turtle import width
 import pygame
 import functions
@@ -40,8 +43,10 @@ def main(running):
   optionsMenu = game.Menu(OPTIONS_MENU_OPTIONS, inOptionsMenu)
   previousMenu = ''
   
-  # create user's car
+  # generate user's car
   userCar = game.Car()
+  # generate stats object 
+  stats = game.Stats()
   # generate grid
   grid = game.Grid()
   finishColisionPos = None
@@ -74,6 +79,7 @@ def main(running):
           elif inPauseMenu:
             pauseMenu.activeOptionIndex = len(pauseMenu.options) - 1 if pauseMenu.activeOptionIndex == 0 else pauseMenu.activeOptionIndex - 1
           elif inGame:
+            if stats.startLapTimestamp == None: stats.startCountLapTime()
             userCar.movingFoward = True
         # key down or s clicked
         elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
@@ -192,18 +198,23 @@ def main(running):
         elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
           if inGame:
             userCar.movingRight = False
-        
 
     if inMainMenu:
       if previousMenu == 'pause':
         userCar = game.Car()
+        stats = game.Stats()
       mainMenu.display()
     elif inOptionsMenu:
       optionsMenu.display()
     elif inPauseMenu:
       pauseMenu.display()
+      stats.freezeTime()
     elif inGame:
       grid.generateMap()
+
+      stats.display()
+      if stats.startLapTimestamp != None: stats.countLapTime()
+
       userCar.displayCar()
       userCar.moveCar()
 
@@ -219,7 +230,8 @@ def main(running):
           elif finishPrevColisionPos[1] < finishColisionPos[1] and finishColisionPos[1] == 1 and userCar.wrongDirection == True:
             userCar.wrongDirection = False
           elif finishPrevColisionPos[1] < finishColisionPos[1] and finishColisionPos[1] == 1 and userCar.wrongDirection == False:
-            print('finish')
+            stats.updateStats()
+            stats.startCountLapTime()
       finishPrevColisionPos = finishColisionPos
 
         
@@ -229,4 +241,5 @@ def main(running):
 
   pygame.quit()
   
-  functions.saveConfigJson(jsonConfigData)
+  functions.saveJson(jsonConfigData, functions.getsCorrectPath('data\\config.json'))
+  functions.saveJson(stats.times['Best Lap Time'], functions.getsCorrectPath('data\\scores.json'))
