@@ -9,7 +9,20 @@ jsonScoreData = functions.readJson(functions.getsCorrectPath('data\\scores.json'
 # text
 TITLE = 'F1 Racing Game'
 FAVIOCON = pygame.image.load(functions.getsCorrectPath('img\\favicon.ico'))
-DEAFULTFONT = functions.getsCorrectPath('font\\Formula1-Regular_web_0.ttf')
+
+DEFAULT_FONT = functions.getsCorrectPath('font\\Formula1-Regular_web_0.ttf')
+DEFAULT_FONT_COLOR = 'white'
+DEFAULT_FONT_SIZE_RATIO = 0.01
+DEFAULT_MIN_MARGIN = 6.4
+DEFAULT_MAX_MARGIN = 10.2
+DEFAULT_MARGIN_RATIO = 0.005
+
+MENU_FONT_COLOR = 'red'
+MENU_FONT_SIZE_RATIO = 0.03
+MENU_MIN_MARGIN = 12.8
+MENU_MAX_MARGIN = 21.6
+MENU_MARGIN_RATIO = 0.01
+MAIN_MENU_FONT_SIZE_RATIO = 0.05
 
 # images
 LOGO = pygame.image.load(functions.getsCorrectPath('img\\f1_banner.png'))
@@ -54,6 +67,6 @@ FINISH_LINE_SCALE = 0.1
 
 # car's settings
 CAR_SCALE = 0.04
-CAR_ROTATE_SPEED_RATIO = 0.0005
-# CAR_MAX_SPEED_RATIO = 1 * 
-# CAR_ACCELERATION = 0.01
+CAR_ROTATE_SPEED_RATIO = 0.015
+CAR_MAX_SPEED_RATIO = 0.005
+CAR_ACCELERATION_RATIO = CAR_MAX_SPEED_RATIO / 5

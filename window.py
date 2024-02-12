@@ -1,10 +1,4 @@
 # IMPORTS
-from mimetypes import init
-from os import stat
-from posixpath import dirname
-import time
-from tkinter.messagebox import NO
-from turtle import width
 import pygame
 import functions
 from constants import *
@@ -27,7 +21,6 @@ def main(running):
 
   # setting tickrate
   clock = pygame.time.Clock()
-  clock.tick(60)
 
   # window states
   inMainMenu = True
@@ -38,7 +31,7 @@ def main(running):
   # imports game file with all stuff
   import game
   # CREATE MENU'S OBJECTS
-  mainMenu = game.Menu(MAIN_MENU_OPTIONS, inMainMenu, int(MAIN_MONITOR.width * 0.04))
+  mainMenu = game.Menu(MAIN_MENU_OPTIONS, inMainMenu, MAIN_MENU_FONT_SIZE_RATIO)
   pauseMenu = game.Menu(PAUSE_MENU_OPTIONS, inPauseMenu)
   optionsMenu = game.Menu(OPTIONS_MENU_OPTIONS, inOptionsMenu)
   previousMenu = ''
@@ -50,7 +43,6 @@ def main(running):
   # generate grid
   grid = game.Grid()
   finishColisionPos = None
-  finishPrevColisionPos = None
 
   # starting game
   while running:
@@ -68,7 +60,9 @@ def main(running):
             jsonConfigData['displayMode']['active'] = "Fullscreen"
           else:
             jsonConfigData['displayMode']['active'] = "Windowed"
+
           pygame.display.toggle_fullscreen()
+          pygame.display.update()
           
         # key up or w clicked
         elif event.key == pygame.K_UP or event.key == pygame.K_w:
@@ -102,8 +96,11 @@ def main(running):
             # update game params
             grid.updateMap()
             userCar.updateParameters(prevScreenSize)  
-            optionsMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
-            pauseMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
+            # update margin & font
+            optionsMenu.updateFontAndMargin()
+            pauseMenu.updateFontAndMargin()
+            mainMenu.updateFontAndMargin()
+            stats.updateFontAndMargin()
 
             pygame.display.update()
           elif inGame:
@@ -119,10 +116,11 @@ def main(running):
             # update game params
             grid.updateMap()
             userCar.updateParameters(prevScreenSize)  
-
-            # UPDATE MARGIN'S
-            optionsMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
-            pauseMenu.updateFontAndMargin(int(screen.get_width() * 0.04))
+            # update margin & font
+            optionsMenu.updateFontAndMargin()
+            pauseMenu.updateFontAndMargin()
+            mainMenu.updateFontAndMargin()
+            stats.updateFontAndMargin()
 
             pygame.display.update()
           elif inGame:
@@ -219,21 +217,24 @@ def main(running):
       userCar.displayCar()
       userCar.moveCar()
 
+      # bounce from borders
       if userCar.colide(grid.borderMask): userCar.bounce()
-        
+
       # prevent wrong way driving
+      if userCar.colide(grid.finishLineMask, *grid.finishLinePosition) == None and finishColisionPos != None:
+        if finishColisionPos[1] == 0: 
+          userCar.wrongDirection = True
+      elif userCar.colide(grid.finishLineMask, *grid.finishLinePosition) != None and finishColisionPos == None:
+        newFinishColisionPos = userCar.colide(grid.finishLineMask, *grid.finishLinePosition)
+        if userCar.wrongDirection and newFinishColisionPos[1] == 0:
+          userCar.wrongDirection = False
+        elif newFinishColisionPos[1] == 0 and userCar.wrongDirection == False:
+          stats.updateStats()
+          stats.startCountLapTime()
       finishColisionPos = userCar.colide(grid.finishLineMask, *grid.finishLinePosition)
-      if finishColisionPos and finishPrevColisionPos:
-        if finishPrevColisionPos[1] != finishColisionPos[1]:
-          if finishPrevColisionPos[1] > finishColisionPos[1]:
-            userCar.wrongDirection = True
-          elif finishPrevColisionPos[1] < finishColisionPos[1] and finishColisionPos[1] == 1 and userCar.wrongDirection == True:
-            userCar.wrongDirection = False
-          elif finishPrevColisionPos[1] < finishColisionPos[1] and finishColisionPos[1] == 1 and userCar.wrongDirection == False:
-            stats.updateStats()
-            stats.startCountLapTime()
-      finishPrevColisionPos = finishColisionPos
-    
+
+
+    clock.tick(60)
     pygame.display.flip()
 
   pygame.quit()

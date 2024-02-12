@@ -1,31 +1,57 @@
 # IMPORTS
 import math
 import time
-from turtle import position
 from window import *
 import functions
 from constants import *
+import math
 
 prevScreenSize = []
 
+class Text:
+  def __init__(self, minMargin, maxMargin, marginRatio, color, fontSizeRatio = DEFAULT_FONT_SIZE_RATIO):
+    self.defaultColor = color
+    self.fontSizeRatio = fontSizeRatio
+    self.fontSize = self.calculateFont()
+    self.font = pygame.font.Font(DEFAULT_FONT, self.fontSize)
+    self.minMargin = minMargin
+    self.maxMargin = maxMargin
+    self.marginRatio = marginRatio
+    self.margin = self.calculateMargin()
+
+  def calculateMargin(self):
+    return max(self.minMargin, min(round(screen.get_width() * self.marginRatio, 2), self.maxMargin))
+  
+  def calculateFont(self):
+    return int(screen.get_width() * self.fontSizeRatio)
+  
+  def updateFontAndMargin(self):
+    self.fontSize = self.calculateFont()
+    self.margin = self.calculateMargin()
+
+  def renderText (self, textContent, color): return self.font.render(textContent, True, color)
+
+  def displayText(self, renderedText, textContent, color, pos, containsOptions = False):
+    # display text
+    text_rect = renderedText.get_rect(topleft = pos)
+    
+    # display options if text is in option menu
+    if containsOptions:
+      self.displayOptions(textContent, renderedText, text_rect, color)
+      
+    screen.blit(renderedText, text_rect) 
+  
 # stats
-class Stats:
-  def __init__(self, fontSize = int(screen.get_width() * 0.01)):
+class Stats(Text):
+  def __init__(self):
+    super().__init__(DEFAULT_MIN_MARGIN, DEFAULT_MAX_MARGIN, DEFAULT_MARGIN_RATIO, DEFAULT_FONT_COLOR, DEFAULT_FONT_SIZE_RATIO)
     self.times = {
       "Best Lap Time": jsonScoreData['bestLapTime'],
       "Current Lap": 0.00,
       "Best Lap on Current Session": 0.00
     }
-    self.fontSize = fontSize
-    self.margin = 10
-    self.color = 'white'
     self.startLapTimestamp = None
     self.freezeTimestamp = None
-    self.font = pygame.font.Font(DEAFULTFONT, fontSize)
-
-  def updateFontAndMargin(self, fontSize):
-    self.fontSize = fontSize
-    self.margin = 10
 
   def startCountLapTime(self):
     self.startLapTimestamp = round(time.time(), 2)
@@ -47,62 +73,48 @@ class Stats:
   def display(self):
     for timeParameter in self.times:
       index = list(self.times).index(timeParameter)
+      # set time always to 00:00 format
       textContent = str(self.times[timeParameter]).replace('.',':')
       if textContent[1] == ':': textContent = '0' + textContent
       if textContent[-2] == ':': textContent += '0'
-      text = self.font.render(f'{timeParameter}: {textContent}', True, self.color)
-      text_rect = text.get_rect(topleft = (int(self.margin), int(index * (self.fontSize + self.margin) + self.margin)))
-      screen.blit(text, text_rect) 
+      textContent = f'{timeParameter}: {textContent}'
+      # display
+      renderedText = self.renderText(textContent, self.defaultColor)
+      pos = ((self.margin/2), (self.margin * index + renderedText.get_height() * index + self.margin/2))
+      self.displayText(renderedText, textContent, self.defaultColor, pos)
 
 # Menu
-class Menu:
-  def __init__(self, menuOptions, active, fontSize = int(screen.get_width() * 0.03)):
+class Menu(Text):
+  def __init__(self, menuOptions, active, fontSizeRatio = MENU_FONT_SIZE_RATIO):
+    super().__init__(MENU_MIN_MARGIN, MENU_MAX_MARGIN, MENU_MARGIN_RATIO, MENU_FONT_COLOR, fontSizeRatio)
     self.options = [str(i) for i in menuOptions.keys()]
     self.propertiesOfOption = menuOptions
     self.active = active
-    self.fontSize = fontSize
-    self.margin = 21.6
-    self.font = pygame.font.Font(DEAFULTFONT, fontSize)
 
-  defaultColor = 'red'
-  hoverColor = 'white'
+  hoverColor = DEFAULT_FONT_COLOR
   activeOptionIndex = 0
-
-  def updateFontAndMargin(self, fontSize):
-    self.fontSize = fontSize
-    self.margin = 21.6
 
   def displayLogo(self):
     transformedLogo = functions.transformImage(LOGO, 0.5)
     screen.blit(transformedLogo, (int(screen.get_width() / 2 - transformedLogo.get_width() / 2), int(screen.get_height() / 2 - self.fontSize - transformedLogo.get_height())))
-    
-
-  def displayText(self, textContent, index):
-    # display text
-    color = self.hoverColor if index == self.activeOptionIndex else self.defaultColor
-    text = self.font.render(textContent, True, color)
-    text_rect = text.get_rect(center = (int(screen.get_width() / 2), int(screen.get_height() / 2 + (self.fontSize + self.margin * 0.4) * index)))
-    
-    # display options if text is in option menu
-    if len(self.propertiesOfOption[textContent]) > 0:
-      optionTextContent = str(jsonConfigData[functions.convertToCammelCase(textContent)]['active'][0]) + ' x ' + str(jsonConfigData[functions.convertToCammelCase(textContent)]['active'][1]) if textContent == 'Resolution' else jsonConfigData[functions.convertToCammelCase(textContent)]['active']
-      
-      transformedArrowLeft = functions.transformImage(ARROW_LEFT, 0.01)
-      transformedArrowRight = functions.transformImage(ARROW_RIGHT, 0.01)
-      
-      transformedArrowLeft_rect = transformedArrowLeft.get_rect(center = (int(text_rect.x + text_rect.width + self.margin), int(text_rect.y + text.get_height() / 2)))
-      
-      optionText = self.font.render(optionTextContent, True, color)
-      optionText_rect = optionText.get_rect(center = (int(transformedArrowLeft_rect.x + optionText.get_width() / 2 + self.margin * 0.5 + transformedArrowLeft.get_width()), text_rect.y + text_rect.height / 2))
-      
-      transformedArrowRight_rect = transformedArrowRight.get_rect(center = (int(optionText_rect.x + self.margin * 0.5 + optionText.get_width() + transformedArrowLeft_rect.width), int(text_rect.y + text.get_height() / 2)))
-     
-      screen.blit(transformedArrowLeft, transformedArrowLeft_rect)      
-      screen.blit(optionText, optionText_rect)
-      screen.blit(transformedArrowRight, transformedArrowRight_rect)
-      
-    screen.blit(text, text_rect) 
   
+  def displayOptions(self, textContent, text, text_rect, color):
+    optionTextContent = str(jsonConfigData[functions.convertToCammelCase(textContent)]['active'][0]) + ' x ' + str(jsonConfigData[functions.convertToCammelCase(textContent)]['active'][1]) if textContent == 'Resolution' else jsonConfigData[functions.convertToCammelCase(textContent)]['active']
+    
+    transformedArrowLeft = functions.transformImage(ARROW_LEFT, 0.01)
+    transformedArrowRight = functions.transformImage(ARROW_RIGHT, 0.01)
+    
+    transformedArrowLeft_rect = transformedArrowLeft.get_rect(center = (int(text_rect.x + text_rect.width + self.margin * 2), int(text_rect.y + text.get_height() / 2)))
+    
+    optionText = self.renderText(optionTextContent, color)
+    optionText_rect = optionText.get_rect(center = (int(transformedArrowLeft_rect.x + optionText.get_width() / 2 + self.margin * 0.5 + transformedArrowLeft.get_width()), text_rect.y + text_rect.height / 2))
+    
+    transformedArrowRight_rect = transformedArrowRight.get_rect(center = (int(optionText_rect.x + self.margin * 0.5 + optionText.get_width() + transformedArrowLeft_rect.width), int(text_rect.y + text.get_height() / 2)))
+    
+    screen.blit(transformedArrowLeft, transformedArrowLeft_rect)      
+    screen.blit(optionText, optionText_rect)
+    screen.blit(transformedArrowRight, transformedArrowRight_rect)
+
   def changeOptionToNext(self, option):
     cammelTextOption = functions.convertToCammelCase(option)
 
@@ -116,8 +128,13 @@ class Menu:
   def display(self):
     screen.fill('black')
     self.displayLogo()
-    for i in range(len(self.options)):
-      self.displayText(self.options[i], i)
+    for index in range(len(self.options)):
+      color = self.hoverColor if index == self.activeOptionIndex else self.defaultColor
+      containsOptions = True if len(self.propertiesOfOption[self.options[index]]) > 0 else False
+      renderedText = self.renderText(self.options[index], color)
+      pos = (int(screen.get_width() / 2 - renderedText.get_width() / 2), int(screen.get_height() / 2 + self.margin * index + renderedText.get_height() * index - renderedText.get_height() / 2))
+      
+      self.displayText(renderedText, self.options[index], color, pos, containsOptions)
 
 class Grid:
   def __init__(self):
@@ -149,15 +166,17 @@ class Car:
     self.movingLeft = False
     self.angle = 0
     self.speed = 0
-    self.acceleration = screen.get_width() / 1280 * 0.01
-    self.maxSpeed = screen.get_width() / 1280 * 0.5
+    self.acceleration = screen.get_width() * CAR_ACCELERATION_RATIO
+    self.maxSpeed = screen.get_width() * CAR_MAX_SPEED_RATIO
+    self.rotateSpeed = CAR_ROTATE_SPEED_RATIO * 360
     self.carCurrentImg = pygame.transform.rotate(self.carImg, self.angle)
     self.wrongDirection = False
     self.position = [screen.get_width()/2 + screen.get_width() * 0.355, screen.get_height()/2 + self.carCurrentImg.get_height()]
 
   def updateParameters(self, prevScreenSize):
-    self.acceleration = screen.get_width() / 1280 * 0.01
-    self.maxSpeed = screen.get_width() / 1280 * 0.5
+    self.acceleration = screen.get_width() * CAR_ACCELERATION_RATIO
+    self.maxSpeed = screen.get_width() * CAR_MAX_SPEED_RATIO
+    self.rotateSpeed = CAR_ROTATE_SPEED_RATIO * 360
     self.carImg = functions.transformImage(CAR, CAR_SCALE)
     self.position = [screen.get_width() / prevScreenSize[0] * self.position[0], screen.get_height() / prevScreenSize[1] * self.position[1]]
 
@@ -171,9 +190,9 @@ class Car:
 
   def rotateCar(self, option):
     if option == 'left':
-      self.angle += CAR_ROTATE_SPEED_RATIO * screen.get_width()
+      self.angle += self.rotateSpeed
     elif option == 'right':
-      self.angle -= CAR_ROTATE_SPEED_RATIO * screen.get_width()
+      self.angle -= self.rotateSpeed
 
     if self.angle > 360:
       self.angle -= 360
@@ -184,10 +203,8 @@ class Car:
     self.speed = max(self.speed - self.acceleration / 1.2 , min(self.speed + self.acceleration / 1.2 ,0))
 
   def moveCar(self):
-    if self.movingFoward and self.speed < self.maxSpeed:
-      self.speed += self.acceleration
-    elif self.movingBackward and self.speed > self.maxSpeed * -1:
-      self.speed -= self.acceleration
+    if self.movingFoward: self.speed = min(self.speed + self.acceleration, self.maxSpeed)
+    elif self.movingBackward: self.speed = max(self.speed - self.acceleration, -self.maxSpeed / 2)
     else:
       self.reduceSpeed()
 
@@ -210,14 +227,13 @@ class Car:
     return pos
   
   def bounce(self):
-    self.speed = -self.speed
-    if self.movingLeft: 
+    if self.movingLeft:
       self.movingLeft = False
-      self.angle -= CAR_ROTATE_SPEED_RATIO * screen.get_width() * 3
-    elif self.movingRight: 
+      self.angle -= self.rotateSpeed * 3
+    if self.movingRight:
       self.movingRight = False
-      self.angle += CAR_ROTATE_SPEED_RATIO * screen.get_width() * 3
-
+      self.angle += self.rotateSpeed * 3
+    self.speed = -self.speed
     self.move()
 
   def displayCar(self):
