@@ -1,1 +1,2 @@
-F1 racing game created by using pygame
+# F1 racing game 
+  created on school project using pygame and screeninfo modules
